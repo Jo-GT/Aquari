@@ -1,45 +1,19 @@
 # Aquari
 
-A cosy ocean-rescue game made for Angie. 🐋
+A little ocean made just for you, Angie. 🐋
 
-- **Rescue Dives**: four levels (Sunny Shallows → Kelp Forest → The Twilight Deep → The Open Ocean). Swim as a diver (or a submarine in the deep), free animals tangled in litter, clean up trash, collect krill, and find the hidden message in a bottle. The last dive has a very special whale shark to save.
-- **Sanctuary**: rescued animals recover here. Feed them krill and give them cuddles, then release them home to unlock a real conservation fact.
-- **Ocean Journal**: every species met, plus every bottle message found.
+**Play it here: <https://outj1nx3d.github.io/Aquari/>** (works on your phone too, just hold the screen to swim)
 
-## Personalising
+## What's inside
 
-Edit [src/config.js](src/config.js): hero name, your name, the whale shark's name, the four bottle messages and the ending message.
+- **Rescue Dives**: five dives, from the Sunny Shallows through the Kelp Forest, down into the Twilight Deep, across Whale Song Bay and out into the Open Ocean. Swim as a diver (or hop in a submarine for the deep bits), free animals tangled in litter, clean up rubbish and collect krill along the way. Keep an eye out for messages in bottles, there are a few hidden on every dive. And on the very last one, a very special, very spotty friend called Spot needs your help.
+- **Sanctuary**: every animal you rescue comes here to get better. Feed them krill, give them cuddles, then send them home and learn a real fact about protecting the ocean.
+- **Ocean Journal**: every creature you've met, plus every bottle message you've found, all kept in one place.
 
-## Playing locally
+Made with love by Jo. ♥
 
-Browsers block game images opened straight from disk, so serve the folder:
-
-```sh
-python -m http.server 8000
-```
-
-then open <http://localhost:8000>.
-
-## Sharing it
-
-Push to GitHub and turn on **Settings → Pages → Deploy from branch (main, / root)**. The game will be live at <https://outj1nx3d.github.io/Aquari/> and works on phones too (hold the screen to swim).
-
-## Assets
-
-`assets/` is generated from the raw files in `Images/` (GIFs become sprite sheets, packed sheets get cropped):
-
-```sh
-pip install pillow
-python tools/build_assets.py
-```
+## Thank yous
 
 Angie's portrait is pixel art by @viiolaceus.
-
-Sounds in `assets/audio/` are compressed copies of the originals in `Sound/` (about 64 MB down to 23 MB):
-
-```sh
-pip install imageio-ffmpeg
-python tools/build_audio.py
-```
 
 Music: "Out of the Blue", "Sunlit Shore", "Swimming With Whales" and "Siren's Song" by Purrple Cat; "Underwater Dreamscape" by Alex Morgan; "Underwater" by leberch.
