@@ -25,8 +25,8 @@ class DiveUIScene extends Phaser.Scene {
     this.rescueText = txt(this, ox + 48, 34, '', 20).setOrigin(0, 0.5);
     this.add.image(ox + 132, 34, 'trash_bottle').setScale(1.2);
     this.trashText = txt(this, ox + 146, 34, '', 20).setOrigin(0, 0.5);
-    this.add.image(ox + 240, 34, 'krill').setScale(2);
-    this.krillText = txt(this, ox + 256, 34, '', 20).setOrigin(0, 0.5);
+    this.add.image(ox + 238, 34, 'food_fish').setScale(1.6);
+    this.foodText = txt(this, ox + 256, 34, '', 20).setOrigin(0, 0.5);
     txt(this, ox + 310, 34, L.name, 16, '#d9f3ffaa').setOrigin(0, 0.5).setVisible(!diver);
 
     if (diver) {
@@ -57,7 +57,7 @@ class DiveUIScene extends Phaser.Scene {
   setStats(stats, L) {
     this.rescueText.setText(`${stats.rescued}/${L.rescues.length}`);
     this.trashText.setText(`${stats.trash}/${L.trash}`);
-    this.krillText.setText(`${stats.krill}`);
+    this.foodText.setText(`${stats.food}`);
     const lvl = this.dive.levelIndex;
     this.bottleText.setText(`${Save.notesFoundIn(lvl)}/${Save.notesIn(lvl).length}`);
     this.shellText.setText(`${stats.shells}/${L.shells || 0}`);

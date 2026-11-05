@@ -38,7 +38,7 @@ class MenuScene extends Phaser.Scene {
       .setDepth(30).setInteractive({ useHandCursor: true })
       .on('pointerup', () => modal(this, {
         title: 'Start over?',
-        body: 'This clears every rescue, star, krill and message found.',
+        body: 'This clears every rescue, star, food, decoration and message found.',
         buttons: [
           { label: 'Keep playing' },
           { label: 'Reset', fill: 0xff8a8a, onClick: () => { Save.reset(); this.scene.restart(); } },
@@ -80,36 +80,36 @@ class MenuScene extends Phaser.Scene {
     c.add(txt(this, GAME_W / 2, 58, 'Choose a dive', 40, '#ffffff', { stroke: '#0b3954', strokeThickness: 8 }).setOrigin(0.5));
 
     LEVELS.forEach((L, i) => {
-      const x = GAME_W / 2 + (i - 1.5) * 222;
+      const x = GAME_W / 2 + (i - (LEVELS.length - 1) / 2) * 182;
       const y = 270;
       const locked = i >= s.unlocked;
       const card = this.add.graphics();
       card.fillStyle(Phaser.Display.Color.HexStringToColor(L.top).color, 1);
-      card.fillRoundedRect(x - 100, y - 140, 200, 280, 20);
+      card.fillRoundedRect(x - 85, y - 140, 170, 280, 20);
       card.fillStyle(Phaser.Display.Color.HexStringToColor(L.bottom).color, 0.85);
-      card.fillRoundedRect(x - 100, y - 10, 200, 150, { tl: 0, tr: 0, bl: 20, br: 20 });
+      card.fillRoundedRect(x - 85, y - 10, 170, 150, { tl: 0, tr: 0, bl: 20, br: 20 });
       card.lineStyle(4, 0xffffff, 0.9);
-      card.strokeRoundedRect(x - 100, y - 140, 200, 280, 20);
+      card.strokeRoundedRect(x - 85, y - 140, 170, 280, 20);
       c.add(card);
 
       const icon = L.vehicle === 'sub'
-        ? this.add.image(x, y - 75, 'sub').setScale(0.9)
+        ? this.add.image(x, y - 75, 'sub').setScale(0.85)
         : this.add.sprite(x, y - 70, 'diver_swim').play('diver_swim').setScale(1.1);
       c.add(icon);
       c.add(txt(this, x, y - 2, `Dive ${i + 1}`, 16, '#ffffffcc').setOrigin(0.5));
-      c.add(txt(this, x, y + 26, L.name, 21, '#ffffff', { align: 'center', wordWrap: { width: 180 } }).setOrigin(0.5));
+      c.add(txt(this, x, y + 14, L.name, 19, '#ffffff', { align: 'center', wordWrap: { width: 150 }, lineSpacing: -4 }).setOrigin(0.5, 0));
       const stars = s.stars[i] || 0;
       for (let k = 0; k < 3; k++) {
-        c.add(this.add.image(x + (k - 1) * 42, y + 78, k < stars ? 'star' : 'star_empty'));
+        c.add(this.add.image(x + (k - 1) * 40, y + 78, k < stars ? 'star' : 'star_empty'));
       }
       c.add(txt(this, x, y + 113, `${L.rescues.length} friends to rescue`, 14, '#ffffffcc').setOrigin(0.5));
 
       if (locked) {
         icon.setTint(0x334455);
-        c.add(this.add.rectangle(x, y, 200, 280, 0x021526, 0.55));
+        c.add(this.add.rectangle(x, y, 170, 280, 0x021526, 0.55));
         c.add(txt(this, x, y - 10, 'Locked', 24, '#ffffff').setOrigin(0.5));
       } else {
-        const hit = this.add.rectangle(x, y, 200, 280, 0xffffff, 0).setInteractive({ useHandCursor: true });
+        const hit = this.add.rectangle(x, y, 170, 280, 0xffffff, 0).setInteractive({ useHandCursor: true });
         hit.on('pointerover', () => card.setAlpha(0.85));
         hit.on('pointerout', () => card.setAlpha(1));
         hit.on('pointerup', () => this.go('Dive', { level: i }));
@@ -117,7 +117,7 @@ class MenuScene extends Phaser.Scene {
       }
     });
 
-    c.add(button(this, GAME_W / 2, 480, 'Back', () => c.destroy(), { w: 160, h: 48, size: 20, fill: 0x9ad8ff }));
-    c.add(txt(this, GAME_W / 2, 520, '★ finish the dive   ★ clean up most of the trash   ★ find all the messages in bottles', 14, '#d9f3ff').setOrigin(0.5));
+    c.add(button(this, GAME_W / 2, 478, 'Back', () => c.destroy(), { w: 160, h: 48, size: 20, fill: 0x9ad8ff }));
+    c.add(txt(this, GAME_W / 2, 434, '★ finish the dive   ★ clean up most of the trash   ★ find all the messages in bottles', 14, '#d9f3ff').setOrigin(0.5));
   }
 }

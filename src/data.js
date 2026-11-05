@@ -3,6 +3,7 @@
 const SPECIES = {
   turtle: {
     name: 'Sea Turtle',
+    favourite: 'seagrass',
     facts: [
       'Sea turtles have been swimming the oceans for over 100 million years. Leatherbacks can mistake floating plastic bags for jellyfish, their favourite food.',
       'The temperature of the sand decides whether baby sea turtles hatch as boys or girls. Warmer nests make more girls!',
@@ -12,6 +13,7 @@ const SPECIES = {
   },
   jelly: {
     name: 'Jellyfish',
+    favourite: 'krill',
     facts: [
       'Jellyfish have no brain, heart or bones, and they have been drifting through the oceans for more than 500 million years.',
       'A group of jellyfish is called a bloom, or a smack.',
@@ -21,6 +23,7 @@ const SPECIES = {
   },
   octopus: {
     name: 'Octopus',
+    favourite: 'crab',
     facts: [
       'Octopuses have three hearts and blue blood, and they can change colour and texture in a split second.',
       'Most of an octopus\'s brain cells are in its arms, so each arm can taste and touch things almost on its own.',
@@ -30,6 +33,7 @@ const SPECIES = {
   },
   eel: {
     name: 'Eel',
+    favourite: 'fish',
     facts: [
       'European eels travel thousands of kilometres to the Sargasso Sea to breed, and nobody has ever seen them spawn in the wild.',
       'Baby eels are see-through! At that stage they are called glass eels.',
@@ -39,6 +43,7 @@ const SPECIES = {
   },
   swordfish: {
     name: 'Swordfish',
+    favourite: 'squid',
     facts: [
       'Swordfish can warm up their eyes and brain, which helps them see clearly while hunting in cold, deep water.',
       'Baby swordfish have scales and teeth, which they lose as they grow up.',
@@ -48,6 +53,7 @@ const SPECIES = {
   },
   angler: {
     name: 'Anglerfish',
+    favourite: 'fish',
     facts: [
       'Anglerfish live in the pitch-black deep sea. Females dangle a glowing lure, lit by bacteria, to attract their dinner.',
       'In some anglerfish species, the tiny male fuses onto the much bigger female and stays attached for life.',
@@ -57,7 +63,9 @@ const SPECIES = {
   },
   whaleshark: {
     name: 'Whale Shark',
+    favourite: 'krill',
     special: true,
+    visitor: true,
     facts: [
       'Whale sharks are the biggest fish in the sea, growing up to 18 m long! They are gentle filter-feeders that eat krill and plankton, and every one has a unique pattern of spots, like a fingerprint.',
       'Scientists tell whale sharks apart by photographing their spots, and anyone with a camera can help by sending in their photos.',
@@ -66,7 +74,52 @@ const SPECIES = {
     ],
     tip: 'Whale sharks are endangered. If you ever swim with one, keep your distance and never touch.',
   },
+  orca: {
+    name: 'Orca',
+    favourite: 'squid',
+    big: true,
+    visitor: true,
+    facts: [
+      'Orcas are actually the biggest members of the dolphin family, not whales.',
+      'Every orca family has its own "dialect" of calls that other families don\'t use.',
+      'Orca grandmothers lead their families and remember where to find food in hard times.',
+    ],
+    tip: 'Choose whale-watching tours that keep their distance and keep noise down.',
+  },
+  bluewhale: {
+    name: 'Blue Whale',
+    favourite: 'krill',
+    big: true,
+    visitor: true,
+    facts: [
+      'Blue whales are the biggest animals that have ever lived, bigger than any dinosaur.',
+      'A blue whale can eat several tonnes of krill in a single day.',
+      'Blue whale calls are some of the loudest sounds made by any animal, and can travel hundreds of kilometres underwater.',
+      'A newborn blue whale calf is already around 7 metres long!',
+    ],
+    tip: 'Ships are a big danger to whales. Support slow-down zones where whales feed.',
+  },
 };
+
+// Food collected on dives and fed to animals at the Sanctuary.
+const FOODS = {
+  krill: { name: 'Krill', tex: 'krill', scale: 2 },
+  seagrass: { name: 'Seagrass', tex: 'food_seagrass', scale: 2 },
+  crab: { name: 'Crabs', tex: 'food_crab', scale: 2 },
+  fish: { name: 'Small fish', tex: 'food_fish', scale: 2 },
+  squid: { name: 'Squid', tex: 'food_squid', scale: 2 },
+};
+const FOOD_ORDER = ['krill', 'seagrass', 'crab', 'fish', 'squid'];
+
+// Sanctuary decorations, bought with recycling points from collected trash.
+const DECOR = [
+  { key: 'starfish', name: 'Starfish', cost: 6 },
+  { key: 'sign', name: 'Name sign', cost: 10 },
+  { key: 'anemone', name: 'Anemone + clownfish', cost: 12 },
+  { key: 'chest', name: 'Treasure chest', cost: 15 },
+  { key: 'lanterns', name: 'Jelly lanterns', cost: 18 },
+  { key: 'castle', name: 'Sandcastle', cost: 22 },
+];
 
 // General ocean facts, found in pearl shells on the seabed and shown on the menu.
 const OCEAN_FACTS = [
@@ -102,7 +155,7 @@ function speciesFact(key, i = 0) {
   return facts[i % facts.length];
 }
 
-const SPECIES_ORDER = ['turtle', 'jelly', 'octopus', 'eel', 'swordfish', 'angler', 'whaleshark'];
+const SPECIES_ORDER = ['turtle', 'jelly', 'octopus', 'eel', 'swordfish', 'angler', 'whaleshark', 'orca', 'bluewhale'];
 const CREATURE_KEYS = ['turtle', 'jelly', 'octopus', 'eel', 'swordfish', 'angler'];
 
 const NICKNAMES = [
@@ -127,7 +180,7 @@ const LEVELS = [
       { species: 'jelly', x: 1380, y: 300 },
       { species: 'turtle', x: 2060, y: 620 },
     ],
-    trash: 14, krill: 5, vents: [620, 1650],
+    trash: 14, food: { krill: 4, seagrass: 3, crab: 2 }, vents: [620, 1650],
     bottles: [{ x: 2300, y: 738 }, { x: 480, y: 742 }, { x: 1150, y: 110 }],
     shells: 3,
     ambient: ['bluewhale'],
@@ -149,7 +202,7 @@ const LEVELS = [
       { species: 'turtle', x: 2100, y: 420 },
       { species: 'jelly', x: 2700, y: 260 },
     ],
-    trash: 18, krill: 6, vents: [700, 1700, 2600],
+    trash: 18, food: { krill: 3, seagrass: 2, crab: 3, fish: 3 }, vents: [700, 1700, 2600],
     bottles: [{ x: 1240, y: 838 }, { x: 2350, y: 842 }, { x: 2940, y: 110 }],
     shells: 3,
     ambient: [],
@@ -171,8 +224,31 @@ const LEVELS = [
       { species: 'octopus', x: 2400, y: 880 },
       { species: 'angler', x: 2950, y: 600 },
     ],
-    trash: 16, krill: 6, vents: [],
+    trash: 16, food: { krill: 3, fish: 3, squid: 3 }, vents: [],
     bottles: [{ x: 3080, y: 938 }, { x: 1300, y: 940 }, { x: 2200, y: 150 }],
+    shells: 3,
+    ambient: [],
+  },
+  {
+    key: 'bay',
+    name: 'Whale Song Bay',
+    blurb: 'A huge, krill-filled bay where the biggest animals on Earth come to feed. Listen... someone enormous is calling for help.',
+    vehicle: 'diver',
+    width: 3800, height: 1000,
+    top: '#8fdcff', bottom: '#0d3f7a', far: 0x1f5f9e, sand: 0xe0c48e,
+    murk: 0x6f7f4a, murkAlpha: 0.42,
+    kelp: 10, coral: 14, rocks: 8,
+    oxygenDrain: 1.3,
+    start: { x: 160, y: 200 },
+    rescues: [
+      { species: 'jelly', x: 700, y: 300 },
+      { species: 'orca', x: 1500, y: 460 },
+      { species: 'octopus', x: 2200, y: 880 },
+      { species: 'swordfish', x: 2750, y: 340 },
+      { species: 'bluewhale', x: 3420, y: 520 },
+    ],
+    trash: 22, food: { krill: 7, fish: 3, squid: 3 }, vents: [900, 2000, 3000],
+    bottles: [{ x: 900, y: 938 }, { x: 2050, y: 120 }, { x: 3680, y: 938 }],
     shells: 3,
     ambient: [],
   },
@@ -193,7 +269,7 @@ const LEVELS = [
       { species: 'jelly', x: 2250, y: 280 },
       { species: 'whaleshark', x: 3050, y: 470 },
     ],
-    trash: 20, krill: 7, vents: [800, 1900, 2700],
+    trash: 20, food: { krill: 4, fish: 2, squid: 3 }, vents: [800, 1900, 2700],
     bottles: [{ x: 2000, y: 838 }, { x: 620, y: 110 }, { x: 3320, y: 840 }],
     shells: 3,
     ambient: ['bluewhale', 'orca'],

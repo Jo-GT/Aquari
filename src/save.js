@@ -7,7 +7,9 @@ const Save = {
     return {
       unlocked: 1,        // number of dives available
       stars: {},          // level index -> best stars
-      krill: 0,           // food for the sanctuary
+      food: {},           // food type -> amount in the sanctuary pantry
+      recycle: 0,         // recycling points from collected trash
+      decor: [],          // sanctuary decorations bought
       inCare: [],         // { id, species, name, health }
       friends: [],        // everyone ever rescued: { name, species }
       rescued: {},        // species -> count
@@ -18,6 +20,7 @@ const Save = {
       metWhaleShark: false,
       finished: false,
       nextId: 1,
+      layout: 2,          // order of the dives (see load)
     };
   },
 
@@ -32,7 +35,26 @@ const Save = {
       stored.bottles.forEach((lvl) => { stored.notesFound[lvl] = 1; });
     }
     delete stored.bottles;
+    // older saves only had krill
+    if (typeof stored.krill === 'number') {
+      stored.food = Object.assign({ krill: stored.krill }, stored.food);
+      delete stored.krill;
+    }
+    // before layout 2, The Open Ocean was dive 4 and Whale Song Bay dive 5
+    if (stored.layout !== 2) {
+      ['stars', 'notesFound'].forEach((field) => {
+        const m = stored[field];
+        if (!m) return;
+        [m[3], m[4]] = [m[4], m[3]];
+        if (m[3] === undefined) delete m[3];
+        if (m[4] === undefined) delete m[4];
+      });
+      stored.layout = 2;
+    }
     this.data = Object.assign(this.defaults(), stored);
+    // unlock any dive added after the last one completed
+    const done = Object.keys(this.data.stars).map(Number);
+    if (done.length) this.data.unlocked = Math.min(LEVELS.length, Math.max(this.data.unlocked, Math.max(...done) + 2));
     return this.data;
   },
 
@@ -45,6 +67,14 @@ const Save = {
   reset() {
     this.data = this.defaults();
     this.store();
+  },
+
+  foodCount(type) {
+    return this.data.food[type] || 0;
+  },
+
+  addFood(type, n = 1) {
+    this.data.food[type] = this.foodCount(type) + n;
   },
 
   notesIn(level) {

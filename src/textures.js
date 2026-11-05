@@ -137,6 +137,138 @@ function makeTextures(scene) {
     '....DDDDD....',
   ], { P: 0xffb3c7, W: 0xffe3ec, D: 0xe58aa5, O: 0xfff6fb }, 2);
 
+  // ---- food
+  pixelTexture(scene, 'food_seagrass', [
+    'G...G.',
+    'G..GG.',
+    'GG.G..',
+    '.G.G.G',
+    '.GGG.G',
+    '.GG.GG',
+    '..G.G.',
+    '..GGG.',
+    '..GG..',
+    '..D...',
+  ], { G: 0x5cc96b, D: 0x3b8a47 }, 2);
+
+  pixelTexture(scene, 'food_crab', [
+    '.RR.....RR.',
+    'R..R...R..R',
+    '.R..W.W..R.',
+    '..RRKRKRR..',
+    '.RRRRRRRRR.',
+    'R.R.R.R.R.R',
+  ], { R: 0xff6b4a, W: 0xffffff, K: 0x0b3954 }, 2);
+
+  pixelTexture(scene, 'food_fish', [
+    '....BBBB..',
+    'B..BBBBKB.',
+    'BBBBBBBBBB',
+    'B..BBBBBB.',
+    '....BBB...',
+  ], { B: 0x8fd3ff, K: 0x0b3954 }, 2);
+
+  pixelTexture(scene, 'food_squid', [
+    '..PPP..',
+    '.PPPPP.',
+    'PPPPPPP',
+    'PPKPKPP',
+    '.PPPPP.',
+    '.PPPPP.',
+    '.P.P.P.',
+    'P.P.P.P',
+    '.P...P.',
+    'P.....P',
+  ], { P: 0xffb0d0, K: 0x0b3954 }, 2);
+
+  pixelTexture(scene, 'knot', [
+    '..TTTT..',
+    '.TDTTDT.',
+    'TTTDDTTT',
+    'TDTDDTDT',
+    'TTTDDTTT',
+    '.TDTTDT.',
+    '..TTTT..',
+  ], { T: 0xdec48c, D: 0x9a7744 }, 3);
+
+  pixelTexture(scene, 'recycle', [
+    '....G....',
+    '...GGG...',
+    '..GG.GG..',
+    '.GG...GG.',
+    'GG.....GG',
+    'GGGGGGGGG',
+  ], { G: 0x4fd18b }, 2);
+
+  // ---- sanctuary decorations
+  pixelTexture(scene, 'deco_starfish', [
+    '.....O.....',
+    '....OOO....',
+    '....OYO....',
+    'OOOOOOOOOOO',
+    '.OOOYOYOOO.',
+    '..OOOOOOO..',
+    '..OOOOOOO..',
+    '.OOOO.OOOO.',
+    '.OOO...OOO.',
+    'OO.......OO',
+  ], { O: 0xff9a4d, Y: 0xffd6a3 }, 3);
+
+  pixelTexture(scene, 'deco_chest', [
+    '.DDDDDDDDDDDDDD.',
+    'DBBBBBBBBBBBBBBD',
+    'DBBBBBBBBBBBBBBD',
+    'DYYYYYYYYYYYYYYD',
+    'DBBBBBBYYBBBBBBD',
+    'DBBBBBBYYBBBBBBD',
+    'DBBBBBBBBBBBBBBD',
+    'DYYYYYYYYYYYYYYD',
+    'DBBBBBBBBBBBBBBD',
+    'DDDDDDDDDDDDDDDD',
+  ], { D: 0x5c3a1a, B: 0x8a5a2b, Y: 0xffd23f }, 3);
+
+  pixelTexture(scene, 'deco_castle', [
+    '........PFF.........',
+    '........PFFF........',
+    '........P...........',
+    'S.S.....P.......S.S.',
+    'SSS....SSS......SSS.',
+    'SSS...SSSSS.....SSS.',
+    'SSS...STSTS.....SSS.',
+    'SSSSSSSSSSSSSSSSSSS.',
+    'SSTSSSSSSSSSSSSSTSS.',
+    'SSSSSSSSDDDSSSSSSSS.',
+    'SSSSSSSDDDDDSSSSSSS.',
+    'SSSSSSSDDDDDSSSSSSS.',
+  ], { S: 0xf0cf8a, T: 0xc99a52, D: 0x8a5a2b, P: 0x6b4a2a, F: 0xff6b9a }, 3);
+
+  pixelTexture(scene, 'deco_anemone', [
+    '.T..T.T..T..T.T.',
+    '.P.TP.P.TP.TP.P.',
+    '.PP.P.PP.P.P.PP.',
+    '..PPPPPPPPPPPPP.',
+    '..PPPPPPPPPPPP..',
+    '...BBBBBBBBBB...',
+    '...BBBBBBBBBB...',
+  ], { T: 0xffd6e8, P: 0xff7eb0, B: 0xc94f7f }, 3);
+
+  pixelTexture(scene, 'clownfish', [
+    '..OWOO..',
+    'O.OWOOWO',
+    'OOOWOOWK',
+    'O.OWOOWO',
+    '..OWOO..',
+  ], { O: 0xff8a2a, W: 0xffffff, K: 0x0b3954 }, 2);
+
+  pixelTexture(scene, 'deco_lanterns', [
+    '..LLLL..',
+    '.LWLLLL.',
+    'LLLLLLLL',
+    'LLLLLLLL',
+    '.L.L.L..',
+    'L.L.L.L.',
+  ], { L: 0xa8f0ff, W: 0xffffff }, 3);
+
   pixelTexture(scene, 'sparkle', [
     '..W..',
     '..W..',
@@ -212,6 +344,12 @@ function makeTextures(scene) {
   g.fillStyle(0x667489, 1); g.fillEllipse(22, 13, 28, 9);
   g.fillStyle(0x10161f, 1); g.fillEllipse(28, 10, 16, 6);
   g.generateTexture('vent', 56, 30);
+  // wooden sign (the name is drawn on top as text)
+  g.clear();
+  g.fillStyle(0x6b4a2a, 1); g.fillRect(44, 30, 8, 34);
+  g.fillStyle(0x5c3a1a, 1); g.fillRoundedRect(0, 0, 96, 38, 6);
+  g.fillStyle(0xa8743d, 1); g.fillRoundedRect(3, 3, 90, 32, 5);
+  g.generateTexture('deco_sign', 96, 64);
   g.destroy();
 
   netTexture(scene, 'net', 64, 64, 11);

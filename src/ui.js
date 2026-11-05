@@ -206,8 +206,10 @@ function angieAvatar(scene, x, y, size) {
   return c;
 }
 
-// A sprite of any species, playing the given animation ('idle', 'walk', 'hurt').
-function creatureSprite(scene, x, y, species, anim = 'idle') {
-  if (species === 'whaleshark') return scene.add.sprite(x, y, 'whaleshark').play('whaleshark_swim').setScale(0.5);
-  return scene.add.sprite(x, y, `${species}_${anim}`).play(`${species}_${anim}`).setScale(2);
+// An animated picture of any species, about `size` pixels wide.
+function speciesPicture(scene, x, y, species, size = 100) {
+  if (species === 'whaleshark') return scene.add.sprite(x, y, 'whaleshark').play('whaleshark_swim').setScale(size / 290);
+  if (species === 'orca') return scene.add.sprite(x, y, 'orca').play('orca').setScale(size / 100);
+  if (species === 'bluewhale') return scene.add.sprite(x, y, 'bluewhale_smile').play('bluewhale_smile').setScale(size / 60);
+  return scene.add.sprite(x, y, `${species}_idle`).play(`${species}_idle`).setScale(size / 48);
 }

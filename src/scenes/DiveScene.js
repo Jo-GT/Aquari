@@ -1,8 +1,21 @@
-// Rescue dive: swim around, free tangled animals, pick up trash and krill.
+// Rescue dive: swim around, free tangled animals, pick up trash and food.
 // The HUD and pop-ups live in DiveUIScene so they don't scroll with the camera.
 
 const RESCUE_TIME = 1.6;      // seconds spent next to an animal to free it
 const POD_SPACING = 22;       // trail points between each follower
+const KNOT_TIME = 1.2;        // seconds to cut one knot on a big animal
+
+// How the big animals look while tangled, and where their knots are (relative to the animal).
+const BIG_RESCUES = {
+  orca: {
+    tex: 'orca', anim: 'orca', scale: 2.4, facing: -1, net: [1.0, 0.55], netY: 0, helpY: 62, cardSize: 240,
+    knots: [[-90, -8], [0, 18], [90, -10]],
+  },
+  bluewhale: {
+    tex: 'bluewhale_smile', anim: 'bluewhale_smile', scale: 6, facing: 1, net: [1.5, 1.0], netY: 30, helpY: 100, cardSize: 170,
+    knots: [[-140, 20], [-50, 70], [50, 10], [140, 45]],
+  },
+};
 
 class DiveScene extends Phaser.Scene {
   constructor() { super('Dive'); }
@@ -20,7 +33,7 @@ class DiveScene extends Phaser.Scene {
     this.surfacing = false;
     this.ui = null;
     this.dark = null;
-    this.stats = { rescued: 0, trash: 0, krill: 0, bottles: 0, shells: 0 };
+    this.stats = { rescued: 0, trash: 0, food: 0, foodBy: {}, bottles: 0, shells: 0 };
     this.trail = [];
     this.pod = [];
     this.oxygen = 100;
@@ -32,7 +45,7 @@ class DiveScene extends Phaser.Scene {
     this.buildWorld();
     this.spawnAmbient();
     this.spawnVents();
-    this.spawnKrill();
+    this.spawnFood();
     this.spawnTrash();
     this.spawnBottles();
     this.spawnShells();
@@ -69,7 +82,7 @@ class DiveScene extends Phaser.Scene {
     modal(ui, {
       image: sc => angieAvatar(sc, 0, 0, 96),
       title: L.name,
-      body: `${L.blurb}\n\nSwim with the arrow keys / WASD, or hold the screen.\nStay close to a tangled animal to free it. Grab trash to clear the water, and krill to feed friends at the Sanctuary.${air}`,
+      body: `${L.blurb}\n\nSwim with the arrow keys / WASD, or hold the screen.\nStay close to a tangled animal to free it. Grab trash to clear the water (it gets recycled into Sanctuary decorations), and food like krill, crabs and fish for your friends.${air}`,
       width: 640,
       buttons: [{ label: "Let's dive!", fill: 0x7cffb2, onClick: () => this.setPaused(false) }],
     });
@@ -167,22 +180,45 @@ class DiveScene extends Phaser.Scene {
     });
   }
 
-  spawnKrill() {
-    this.krill = [];
+  // Food for the Sanctuary. Krill, fish and squid swim in little groups;
+  // seagrass and crabs sit on the seabed.
+  spawnFood() {
+    this.food = [];
     const L = this.L;
-    for (let i = 0; i < L.krill; i++) {
-      const cx = this.rnd.between(250, L.width - 200);
-      const cy = this.rnd.between(130, L.height - 140);
-      for (let k = 0; k < 6; k++) {
-        const s = this.add.image(cx + this.rnd.between(-40, 40), cy + this.rnd.between(-24, 24), 'krill')
-          .setScale(2).setDepth(20).setFlipX(this.rnd.frac() > 0.5);
-        this.tweens.add({
-          targets: s, x: s.x + this.rnd.between(-30, 30), y: s.y + this.rnd.between(-16, 16),
-          duration: this.rnd.between(900, 1700), yoyo: true, repeat: -1, ease: 'Sine.inOut',
-        });
-        this.krill.push(s);
+    const perGroup = { krill: 6, fish: 4, squid: 2, seagrass: 3, crab: 2 };
+    Object.entries(L.food).forEach(([type, groups]) => {
+      const def = FOODS[type];
+      const onFloor = type === 'seagrass' || type === 'crab';
+      for (let i = 0; i < groups; i++) {
+        const cx = this.rnd.between(250, L.width - 200);
+        const cy = onFloor ? L.height - 48 : this.rnd.between(130, L.height - 140);
+        for (let k = 0; k < perGroup[type]; k++) {
+          const x = cx + this.rnd.between(-40, 40);
+          const y = onFloor ? cy - this.rnd.between(0, 6) : cy + this.rnd.between(-24, 24);
+          const f = this.add.image(x, y, def.tex).setScale(def.scale).setDepth(20);
+          f.foodType = type;
+          if (type === 'seagrass') {
+            f.setOrigin(0.5, 1);
+            this.tweens.add({
+              targets: f, angle: { from: -8, to: 8 }, duration: this.rnd.between(1200, 2000),
+              yoyo: true, repeat: -1, ease: 'Sine.inOut',
+            });
+          } else if (type === 'crab') {
+            this.tweens.add({
+              targets: f, x: x + this.rnd.between(-50, 50), duration: this.rnd.between(1500, 2600),
+              yoyo: true, repeat: -1, ease: 'Sine.inOut',
+            });
+          } else {
+            f.setFlipX(this.rnd.frac() > 0.5);
+            this.tweens.add({
+              targets: f, x: x + this.rnd.between(-30, 30), y: y + this.rnd.between(-16, 16),
+              duration: this.rnd.between(900, 1700), yoyo: true, repeat: -1, ease: 'Sine.inOut',
+            });
+          }
+          this.food.push(f);
+        }
       }
-    }
+    });
   }
 
   spawnTrash() {
@@ -243,9 +279,21 @@ class DiveScene extends Phaser.Scene {
   spawnTangled() {
     this.tangled = this.L.rescues.map((r) => {
       const special = r.species === 'whaleshark';
+      const big = !!SPECIES[r.species].big;
       let spr;
       let net;
-      if (special) {
+      let knots = null;
+      if (big) {
+        const b = BIG_RESCUES[r.species];
+        spr = this.add.sprite(r.x, r.y, b.tex).play({ key: b.anim, frameRate: 3 }).setScale(b.scale);
+        net = this.add.image(r.x, r.y + b.netY, 'bignet').setScale(b.net[0], b.net[1]);
+        spr.artFacing = b.facing;
+        knots = b.knots.map(([dx, dy]) => {
+          const img = this.add.image(r.x + dx, r.y + dy, 'knot').setDepth(27);
+          this.tweens.add({ targets: img, scale: 1.25, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+          return { x: r.x + dx, y: r.y + dy, img, progress: 0, done: false };
+        });
+      } else if (special) {
         spr = this.add.sprite(r.x, r.y, 'whaleshark').play({ key: 'whaleshark_swim', frameRate: 2 }).setScale(0.75);
         net = this.add.image(r.x - 6, r.y + 6, 'bignet').setScale(0.95);
         spr.artFacing = -1;
@@ -256,12 +304,14 @@ class DiveScene extends Phaser.Scene {
       }
       spr.setDepth(25);
       net.setDepth(26);
-      this.tweens.add({ targets: [spr, net], angle: { from: -5, to: 5 }, duration: 300, yoyo: true, repeat: -1 });
-      const help = txt(this, r.x, r.y - (special ? 110 : 56), '!', 34, '#ff6b9a', { stroke: '#ffffff', strokeThickness: 6, fontStyle: '700' })
+      const wobble = big ? 2 : 5;
+      this.tweens.add({ targets: [spr, net], angle: { from: -wobble, to: wobble }, duration: 300, yoyo: true, repeat: -1 });
+      const helpY = big ? BIG_RESCUES[r.species].helpY : special ? 110 : 56;
+      const help = txt(this, r.x, r.y - helpY, '!', 34, '#ff6b9a', { stroke: '#ffffff', strokeThickness: 6, fontStyle: '700' })
         .setOrigin(0.5).setDepth(27);
       this.tweens.add({ targets: help, y: help.y - 10, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
       return {
-        spr, net, help, species: r.species, special,
+        spr, net, help, knots, species: r.species, special,
         ring: this.add.graphics().setDepth(27),
         progress: 0,
         need: special ? 4.5 : RESCUE_TIME,
@@ -371,12 +421,13 @@ class DiveScene extends Phaser.Scene {
     const p = this.player;
     const near = (o, r) => Phaser.Math.Distance.Between(o.x, o.y, p.x, p.y) < r;
 
-    this.krill = this.krill.filter((k) => {
-      if (!near(k, 36)) return true;
-      this.tweens.killTweensOf(k);
-      this.tweens.add({ targets: k, x: p.x, y: p.y, scale: 0, duration: 150, onComplete: () => k.destroy() });
-      this.stats.krill++;
-      Save.data.krill++;
+    this.food = this.food.filter((f) => {
+      if (!near(f, 36)) return true;
+      this.tweens.killTweensOf(f);
+      this.tweens.add({ targets: f, x: p.x, y: p.y, scale: 0, duration: 150, onComplete: () => f.destroy() });
+      this.stats.food++;
+      this.stats.foodBy[f.foodType] = (this.stats.foodBy[f.foodType] || 0) + 1;
+      Save.addFood(f.foodType);
       Save.store();
       this.refreshHud();
       return false;
@@ -388,6 +439,8 @@ class DiveScene extends Phaser.Scene {
       this.tweens.add({ targets: t, x: p.x, y: p.y, scale: 0, angle: 360, duration: 250, onComplete: () => t.destroy() });
       this.sparkles.explode(5, t.x, t.y);
       this.stats.trash++;
+      Save.data.recycle++;
+      Save.store();
       const left = 1 - this.stats.trash / this.L.trash;
       this.tweens.add({ targets: this.murk, alpha: this.L.murkAlpha * left, duration: 400 });
       this.refreshHud();
@@ -444,6 +497,7 @@ class DiveScene extends Phaser.Scene {
     const p = this.player;
     this.tangled.forEach((t) => {
       if (t.freed) return;
+      if (t.knots) { this.updateKnots(t, dt); return; }
       const d = Phaser.Math.Distance.Between(t.spr.x, t.spr.y, p.x, p.y);
       if (d < t.radius) {
         if (t.progress === 0 && t.special) {
@@ -462,6 +516,86 @@ class DiveScene extends Phaser.Scene {
           .arc(t.spr.x, t.spr.y, r, -Math.PI / 2, -Math.PI / 2 + frac * Math.PI * 2).strokePath();
       }
       if (t.progress >= t.need) this.freeCreature(t);
+    });
+  }
+
+  // Big animals are tied up with several knots; each one is cut by staying close to it.
+  updateKnots(t, dt) {
+    const p = this.player;
+    t.ring.clear();
+    t.knots.forEach((k) => {
+      if (k.done) return;
+      if (Phaser.Math.Distance.Between(k.x, k.y, p.x, p.y) < 60) {
+        if (!t.warned) {
+          t.warned = true;
+          toast(this.ui, `This ${SPECIES[t.species].name.toLowerCase()} is tied up in fishing line! Cut all ${t.knots.length} knots to free it.`, '#ffd23f');
+        }
+        k.progress += dt;
+      } else {
+        k.progress = Math.max(0, k.progress - dt * 0.5);
+      }
+      if (k.progress > 0) {
+        const frac = Math.min(1, k.progress / KNOT_TIME);
+        t.ring.lineStyle(6, 0xffffff, 0.3).strokeCircle(k.x, k.y, 30);
+        t.ring.lineStyle(6, 0x7cffb2, 1).beginPath()
+          .arc(k.x, k.y, 30, -Math.PI / 2, -Math.PI / 2 + frac * Math.PI * 2).strokePath();
+      }
+      if (k.progress >= KNOT_TIME) {
+        k.done = true;
+        this.tweens.killTweensOf(k.img);
+        this.tweens.add({ targets: k.img, scale: 0, angle: 180, duration: 300, onComplete: () => k.img.destroy() });
+        this.sparkles.explode(8, k.x, k.y);
+        const left = t.knots.filter(o => !o.done).length;
+        if (left) toast(this.ui, `Snip! ${left} knot${left > 1 ? 's' : ''} to go.`, '#7cffb2');
+      }
+    });
+    if (t.knots.every(k => k.done)) this.freeBig(t);
+  }
+
+  // Big animals don't fit in the Sanctuary: they swim off and visit it later.
+  freeBig(t) {
+    t.freed = true;
+    t.ring.destroy();
+    t.help.destroy();
+    this.tweens.killTweensOf([t.spr, t.net]);
+    t.spr.setAngle(0);
+    this.tweens.add({
+      targets: t.net, scaleX: t.net.scaleX * 1.6, scaleY: t.net.scaleY * 1.6, alpha: 0, duration: 700,
+      onComplete: () => t.net.destroy(),
+    });
+    this.hearts.explode(36, t.spr.x, t.spr.y);
+    this.cameras.main.flash(250, 255, 255, 255, false);
+    this.stats.rescued++;
+
+    const s = Save.data;
+    const sp = SPECIES[t.species];
+    const b = BIG_RESCUES[t.species];
+    s.rescued[t.species] = (s.rescued[t.species] || 0) + 1;
+    const name = Save.pickNickname();
+    s.friends.push({ name, species: t.species });
+    s.factsSeen[t.species] = Math.max(1, s.factsSeen[t.species] || 0);
+    Save.store();
+    this.refreshHud();
+    t.spr.play(b.anim);
+
+    this.setPaused(true);
+    modal(this.ui, {
+      title: `You freed the ${sp.name.toLowerCase()}! Meet ${name}`,
+      image: sc => speciesPicture(sc, 0, 0, t.species, b.cardSize),
+      body: `${speciesFact(t.species, 0)}\n\n${name} is too big for the Sanctuary, but will come and visit you there.`,
+      width: 660,
+      buttons: [{
+        label: `Bye ${name}!`, fill: 0x7cffb2,
+        onClick: () => {
+          this.setPaused(false);
+          t.spr.setFlipX(t.spr.artFacing === -1);
+          this.tweens.add({
+            targets: t.spr, x: t.spr.x + 1600, y: t.spr.y - 200, duration: 6000, ease: 'Sine.in',
+            onComplete: () => t.spr.destroy(),
+          });
+          this.checkComplete();
+        },
+      }],
     });
   }
 
@@ -610,6 +744,8 @@ class DiveScene extends Phaser.Scene {
     const notes = Save.notesIn(i).length;
     const allNotes = Save.notesFoundIn(i) >= notes;
     const stars = 1 + (cleaned ? 1 : 0) + (allNotes ? 1 : 0);
+    const gathered = FOOD_ORDER.filter(f => this.stats.foodBy[f])
+      .map(f => `${this.stats.foodBy[f]} ${FOODS[f].name.toLowerCase()}`).join(', ') || 'none';
     s.stars[i] = Math.max(s.stars[i] || 0, stars);
     s.unlocked = Math.min(LEVELS.length, Math.max(s.unlocked, i + 2));
     if (last) s.finished = true;
@@ -631,7 +767,7 @@ class DiveScene extends Phaser.Scene {
         }
         return y + 56;
       },
-      body: `Friends rescued: ${this.stats.rescued}\nTrash cleaned: ${this.stats.trash} / ${this.L.trash}\nKrill collected: ${this.stats.krill}\nMessages in bottles: ${Save.notesFoundIn(i)} / ${notes}${allNotes ? ' ♥' : ' (some are still hidden...)'}\nOcean facts discovered: ${this.stats.shells}`,
+      body: `Friends rescued: ${this.stats.rescued}\nTrash cleaned: ${this.stats.trash} / ${this.L.trash} (+${this.stats.trash} recycling points)\nFood gathered: ${gathered}\nMessages in bottles: ${Save.notesFoundIn(i)} / ${notes}${allNotes ? ' ♥' : ' (some are still hidden...)'}\nOcean facts discovered: ${this.stats.shells}`,
       width: 640,
       buttons,
     });

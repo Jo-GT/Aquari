@@ -10,12 +10,13 @@ class JournalScene extends Phaser.Scene {
     const met = SPECIES_ORDER.filter(k => s.rescued[k]).length;
     txt(this, GAME_W / 2, 80, `Species met: ${met} / ${SPECIES_ORDER.length}   ·   Friends rescued: ${s.friends.length}`, 17, '#7a4a1c').setOrigin(0.5);
 
+    const firstRow = Math.ceil(SPECIES_ORDER.length / 2);
     SPECIES_ORDER.forEach((key, i) => {
-      const row = i < 4 ? 0 : 1;
-      const col = row === 0 ? i : i - 4;
-      const perRow = row === 0 ? 4 : 3;
-      const x = GAME_W / 2 + (col - (perRow - 1) / 2) * 220;
-      const y = 196 + row * 196;
+      const row = i < firstRow ? 0 : 1;
+      const col = row === 0 ? i : i - firstRow;
+      const perRow = row === 0 ? firstRow : SPECIES_ORDER.length - firstRow;
+      const x = GAME_W / 2 + (col - (perRow - 1) / 2) * 182;
+      const y = 192 + row * 174;
       this.card(key, x, y);
     });
 
@@ -37,24 +38,22 @@ class JournalScene extends Phaser.Scene {
     const known = !!s.rescued[key];
     const g = this.add.graphics();
     g.fillStyle(0xfff8e7, 1);
-    g.fillRoundedRect(x - 100, y - 85, 200, 170, 18);
+    g.fillRoundedRect(x - 86, y - 80, 172, 160, 18);
     g.lineStyle(3, known ? 0xd18a3a : 0xc9a87a, 1);
-    g.strokeRoundedRect(x - 100, y - 85, 200, 170, 18);
+    g.strokeRoundedRect(x - 86, y - 80, 172, 160, 18);
 
-    const pic = key === 'whaleshark'
-      ? this.add.sprite(x, y - 26, 'whaleshark').play('whaleshark_swim').setScale(0.36)
-      : this.add.sprite(x, y - 26, `${key}_idle`).play(`${key}_idle`).setScale(2.2);
+    const size = { whaleshark: 110, orca: 130, bluewhale: 110 }[key] || 96;
+    const pic = speciesPicture(this, x, y - 28, key, size);
     if (!known) pic.setTintFill(0x6b5a45).setAlpha(0.6);
 
-    txt(this, x, y + 38, known ? sp.name : '???', 20, '#5a3410').setOrigin(0.5);
-    const note = key === 'whaleshark'
-      ? (known ? 'Free and visiting the sanctuary' : 'Not met yet')
-      : (known ? `Rescued ${s.rescued[key]}  ·  Released ${s.released[key] || 0}` : 'Not met yet');
-    txt(this, x, y + 58, note, 13, '#8a5a2a').setOrigin(0.5);
-    if (known) txt(this, x, y + 74, `Facts found: ${this.factsKnown(key)} / ${sp.facts.length}`, 13, '#d1588a').setOrigin(0.5);
+    txt(this, x, y + 32, known ? sp.name : '???', 18, '#5a3410').setOrigin(0.5);
+    let note = 'Not met yet';
+    if (known) note = sp.visitor ? 'Visits the Sanctuary' : `Rescued ${s.rescued[key]} · Released ${s.released[key] || 0}`;
+    txt(this, x, y + 52, note, 12, '#8a5a2a').setOrigin(0.5);
+    if (known) txt(this, x, y + 68, `Facts found: ${this.factsKnown(key)} / ${sp.facts.length}`, 12, '#d1588a').setOrigin(0.5);
 
     if (known) {
-      const hit = this.add.rectangle(x, y, 200, 170, 0xffffff, 0).setInteractive({ useHandCursor: true });
+      const hit = this.add.rectangle(x, y, 172, 160, 0xffffff, 0).setInteractive({ useHandCursor: true });
       hit.on('pointerup', () => pagedModal(this, this.factPages(key)));
     }
   }
@@ -69,7 +68,7 @@ class JournalScene extends Phaser.Scene {
     const sp = SPECIES[key];
     const n = this.factsKnown(key);
     const left = sp.facts.length - n;
-    const how = key === 'whaleshark' ? `tap ${PERSONAL.whaleSharkName} at the Sanctuary` : `release more ${sp.name.toLowerCase()} friends`;
+    const how = sp.visitor ? 'tap them when they visit the Sanctuary' : `release more ${sp.name.toLowerCase()} friends`;
     const known = sp.facts.slice(0, n);
     const pages = [];
     for (let i = 0; i < known.length; i += 2) {

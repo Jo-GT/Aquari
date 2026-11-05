@@ -22,7 +22,12 @@ const PERSONAL = {
       "Thank you for bringing me to the Aquarium and for being my favourite person to explore the ocean with. I love you.",
       "Lots of deep-sea creatures make their own light. You do too.",
     ],
-    [ // Dive 4: The Open Ocean
+    [ // Dive 4: Whale Song Bay
+      "Welcome to the biggest dive yet! Blue whales are the largest animals ever, and they're still not as big as how much I love you.",
+      "Orca families stick together for life. Thanks for being my favourite pod-mate.",
+      "One more dive after this one... and someone very spotty is waiting. Keep going, you're amazing at this.",
+    ],
+    [ // Dive 5: The Open Ocean
       "Nearly there! You care so much about the whole ocean, and I love that about you.",
       "Whatever else is out here, you've already rescued my heart.",
       "Last bottle! There's a very special, very spotty friend out here who needs your help. Go get them, Angie. I love you.",
