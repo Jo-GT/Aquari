@@ -22,7 +22,7 @@ then open <http://localhost:8000>.
 
 ## Sharing it
 
-Push to GitHub and turn on **Settings → Pages → Deploy from branch (main, / root)**. The game will be live at `https://<user>.github.io/Aquari/` and works on phones too (hold the screen to swim).
+Push to GitHub and turn on **Settings → Pages → Deploy from branch (main, / root)**. The game will be live at <https://outj1nx3d.github.io/Aquari/> and works on phones too (hold the screen to swim).
 
 ## Assets
 
