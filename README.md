@@ -34,3 +34,12 @@ python tools/build_assets.py
 ```
 
 Angie's portrait is pixel art by @viiolaceus.
+
+Sounds in `assets/audio/` are compressed copies of the originals in `Sound/` (about 64 MB down to 23 MB):
+
+```sh
+pip install imageio-ffmpeg
+python tools/build_audio.py
+```
+
+Music: "Out of the Blue", "Sunlit Shore", "Swimming With Whales" and "Siren's Song" by Purrple Cat; "Underwater Dreamscape" by Alex Morgan; "Underwater" by leberch.

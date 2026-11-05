@@ -69,7 +69,9 @@ class DiveScene extends Phaser.Scene {
     this.keys = this.input.keyboard.addKeys('UP,DOWN,LEFT,RIGHT,W,A,S,D');
     this.input.keyboard.on('keydown-ESC', () => this.openPause());
 
-    this.events.once('shutdown', () => this.scene.stop('DiveUI'));
+    Sound.music(this, L.music);
+    Sound.ambience(this, L.ambience);
+    this.events.once('shutdown', () => { Sound.stopMoving(); this.scene.stop('DiveUI'); });
     this.scene.launch('DiveUI', { dive: this });
   }
 
@@ -149,7 +151,11 @@ class DiveScene extends Phaser.Scene {
       if (kind === 'bluewhale') {
         const w = this.add.sprite(-200, L.height * 0.42, 'bluewhale').play('bluewhale')
           .setScale(3.2).setAlpha(0.5).setTint(0xa8d8ff).setScrollFactor(sf, 1).setDepth(4);
-        this.tweens.add({ targets: w, x: range + 200, duration: 46000, repeat: -1, repeatDelay: 3000, delay: i * 9000 });
+        this.tweens.add({
+          targets: w, x: range + 200, duration: 46000, repeat: -1, repeatDelay: 3000, delay: i * 9000,
+          onStart: () => this.time.delayedCall(6000, () => Sound.sfx('sfx_whale_deep', 0.35)),
+          onRepeat: () => this.time.delayedCall(6000, () => Sound.sfx('sfx_whale_deep', 0.35)),
+        });
       } else if (kind === 'orca') {
         for (let k = 0; k < 2; k++) {
           const o = this.add.sprite(-260 - k * 140, 70 + k * 40, 'orca').play('orca')
@@ -350,7 +356,7 @@ class DiveScene extends Phaser.Scene {
     const dt = Math.min(delta, 50) / 1000;
     this.updateAmbient();
     if (this.dark) this.updateDarkness();
-    if (this.paused || this.done || this.surfacing) return;
+    if (this.paused || this.done || this.surfacing) { Sound.setMoving(0); return; }
 
     this.updatePlayer();
     this.updateTrail();
@@ -388,6 +394,7 @@ class DiveScene extends Phaser.Scene {
     if (Math.abs(v.x) > 20) p.setFlipX(p.artFacing === 1 ? v.x < 0 : v.x > 0);
     const facingLeft = p.artFacing === 1 ? p.flipX : !p.flipX;
     const moving = Math.hypot(v.x, v.y) > 60;
+    Sound.setMoving(Math.min(1, Math.hypot(v.x, v.y) / p.speed));
 
     if (p.artFacing === 1) p.play(moving ? 'diver_swim' : 'diver_tread', true);
     const tilt = moving ? Phaser.Math.Clamp(v.y / p.speed, -1, 1) * 0.4 * (facingLeft ? -1 : 1) : 0;
@@ -425,6 +432,7 @@ class DiveScene extends Phaser.Scene {
       if (!near(f, 36)) return true;
       this.tweens.killTweensOf(f);
       this.tweens.add({ targets: f, x: p.x, y: p.y, scale: 0, duration: 150, onComplete: () => f.destroy() });
+      Sound.sfx('pop');
       this.stats.food++;
       this.stats.foodBy[f.foodType] = (this.stats.foodBy[f.foodType] || 0) + 1;
       Save.addFood(f.foodType);
@@ -438,6 +446,7 @@ class DiveScene extends Phaser.Scene {
       this.tweens.killTweensOf(t);
       this.tweens.add({ targets: t, x: p.x, y: p.y, scale: 0, angle: 360, duration: 250, onComplete: () => t.destroy() });
       this.sparkles.explode(5, t.x, t.y);
+      Sound.sfx('trash');
       this.stats.trash++;
       Save.data.recycle++;
       Save.store();
@@ -470,6 +479,7 @@ class DiveScene extends Phaser.Scene {
     const note = notes[index];
     Save.data.notesFound[lvl] = index + 1;
     Save.store();
+    Sound.sfx('chime');
     this.stats.bottles++;
     this.refreshHud();
     this.setPaused(true);
@@ -489,6 +499,7 @@ class DiveScene extends Phaser.Scene {
     const i = unseen.length ? Phaser.Utils.Array.GetRandom(unseen) : Phaser.Math.Between(0, OCEAN_FACTS.length - 1);
     if (!seen.includes(i)) seen.push(i);
     Save.store();
+    Sound.sfx('chime');
     this.stats.shells++;
     this.ui.showFact(OCEAN_FACTS[i]);
   }
@@ -528,6 +539,7 @@ class DiveScene extends Phaser.Scene {
       if (Phaser.Math.Distance.Between(k.x, k.y, p.x, p.y) < 60) {
         if (!t.warned) {
           t.warned = true;
+          Sound.sfx(t.species === 'orca' ? 'sfx_orca' : 'sfx_whale_deep', t.species === 'orca' ? 0.5 : 1);
           toast(this.ui, `This ${SPECIES[t.species].name.toLowerCase()} is tied up in fishing line! Cut all ${t.knots.length} knots to free it.`, '#ffd23f');
         }
         k.progress += dt;
@@ -545,6 +557,7 @@ class DiveScene extends Phaser.Scene {
         this.tweens.killTweensOf(k.img);
         this.tweens.add({ targets: k.img, scale: 0, angle: 180, duration: 300, onComplete: () => k.img.destroy() });
         this.sparkles.explode(8, k.x, k.y);
+        Sound.sfx('snip');
         const left = t.knots.filter(o => !o.done).length;
         if (left) toast(this.ui, `Snip! ${left} knot${left > 1 ? 's' : ''} to go.`, '#7cffb2');
       }
@@ -564,6 +577,8 @@ class DiveScene extends Phaser.Scene {
       onComplete: () => t.net.destroy(),
     });
     this.hearts.explode(36, t.spr.x, t.spr.y);
+    Sound.sfx('sfx_ping');
+    this.time.delayedCall(500, () => Sound.sfx(t.species === 'orca' ? 'sfx_orca' : 'sfx_whale', t.species === 'orca' ? 0.5 : 1));
     this.cameras.main.flash(250, 255, 255, 255, false);
     this.stats.rescued++;
 
@@ -610,6 +625,7 @@ class DiveScene extends Phaser.Scene {
       onComplete: () => t.net.destroy(),
     });
     this.hearts.explode(t.special ? 30 : 14, t.spr.x, t.spr.y);
+    Sound.sfx('sfx_ping');
     this.cameras.main.flash(200, 255, 255, 255, false);
     this.stats.rescued++;
 
@@ -664,6 +680,7 @@ class DiveScene extends Phaser.Scene {
     this.surfacing = true;
     const p = this.player;
     p.body.setVelocity(0, 0);
+    Sound.sfx('oops');
     toast(this.ui, `Phew! ${PERSONAL.heroName} swam up for a big breath of air.`, '#9ad8ff');
     this.tweens.add({
       targets: p, y: 50, duration: 1500, ease: 'Sine.inOut',
@@ -750,6 +767,7 @@ class DiveScene extends Phaser.Scene {
     s.unlocked = Math.min(LEVELS.length, Math.max(s.unlocked, i + 2));
     if (last) s.finished = true;
     Save.store();
+    Sound.sfx('fanfare');
 
     const buttons = [
       { label: 'Sanctuary', fill: 0x7cffb2, onClick: () => this.goTo('Sanctuary') },

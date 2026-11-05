@@ -44,6 +44,9 @@ class DiveUIScene extends Phaser.Scene {
 
     this.factBox = null;
 
+    const mute = button(this, GAME_W - 186, 34, Sound.isMuted() ? 'Sound: off' : 'Sound: on', () => {
+      mute.label.setText(Sound.toggleMute() ? 'Sound: off' : 'Sound: on');
+    }, { w: 120, h: 42, size: 16, fill: 0x9ad8ff });
     button(this, GAME_W - 66, 34, 'Pause', () => this.dive.openPause(), { w: 108, h: 42, size: 18, fill: 0x9ad8ff });
 
     this.arrow = this.add.container(0, 0).setVisible(false);

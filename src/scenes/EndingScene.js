@@ -4,6 +4,8 @@ class EndingScene extends Phaser.Scene {
   create() {
     const s = Save.data;
     this.cameras.main.fadeIn(800, 2, 21, 38);
+    Sound.music(this, 'music_end');
+    Sound.ambience(this, 'amb_waves');
     oceanGradient(this, GAME_W, GAME_H, '#c4f6ff', '#3aa6d6');
     lightRays(this, [100, 300, 520, 740, 900]);
     drawSeabed(this, GAME_W, GAME_H, { sand: 0xf5dca8, kelp: 6, coral: 18, rocks: 3 });

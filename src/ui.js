@@ -33,6 +33,7 @@ function button(scene, x, y, label, onClick, opts = {}) {
   c.on('pointerup', () => {
     if (!c.enabled) return;
     c.setScale(1.05);
+    Sound.sfx('click');
     onClick();
   });
   c.setEnabled = (on) => { c.enabled = on; c.setAlpha(on ? 1 : 0.45); return c; };

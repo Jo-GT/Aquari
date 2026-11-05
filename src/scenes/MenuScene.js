@@ -4,6 +4,9 @@ class MenuScene extends Phaser.Scene {
   create() {
     const s = Save.data;
     this.cameras.main.fadeIn(400, 2, 21, 38);
+    Sound.music(this, 'music_menu');
+    Sound.ambience(this, 'amb_waves');
+    Sound.stopMoving();
     oceanGradient(this, GAME_W, GAME_H, '#a6f0ff', '#1876a8');
     lightRays(this, [140, 380, 600, 820]);
 
@@ -44,6 +47,10 @@ class MenuScene extends Phaser.Scene {
           { label: 'Reset', fill: 0xff8a8a, onClick: () => { Save.reset(); this.scene.restart(); } },
         ],
       }));
+
+    const mute = button(this, GAME_W - 80, 34, Sound.isMuted() ? 'Sound: off' : 'Sound: on', () => {
+      mute.label.setText(Sound.toggleMute() ? 'Sound: off' : 'Sound: on');
+    }, { w: 140, h: 42, size: 17, fill: 0x9ad8ff }).setDepth(30);
 
     this.factBanner();
     ambientBubbles(this);

@@ -25,6 +25,8 @@ class SanctuaryScene extends Phaser.Scene {
 
   create() {
     this.cameras.main.fadeIn(400, 2, 21, 38);
+    Sound.music(this, 'music_sunlit');
+    Sound.ambience(this, 'amb_waves');
     this.selected = null;
     this.animals = [];
     this.visitors = [];
@@ -90,6 +92,7 @@ class SanctuaryScene extends Phaser.Scene {
     this.time.delayedCall(v.delay, () => swim(true));
     this.visitors.push({ spr, label });
     spr.setInteractive({ useHandCursor: true }).on('pointerup', () => {
+      Sound.sfx({ whaleshark: 'sfx_ping', orca: 'sfx_orca', bluewhale: 'sfx_whale' }[key], key === 'orca' ? 0.5 : 1);
       const { fact, isNew } = Save.revealFact(key);
       modal(this, {
         title: `${name} the ${SPECIES[key].name.toLowerCase()} came to visit!`,
@@ -241,6 +244,7 @@ class SanctuaryScene extends Phaser.Scene {
   feed(s, type, fromX, fromY) {
     const food = FOODS[type];
     if (Save.foodCount(type) < 1) {
+      Sound.sfx('oops');
       toast(this, `No ${food.name.toLowerCase()} left! Gather some on a Rescue Dive.`, '#ffd23f');
       return;
     }
@@ -255,6 +259,7 @@ class SanctuaryScene extends Phaser.Scene {
       onComplete: () => {
         k.destroy();
         this.hearts.explode(fav ? 10 : 3, s.x, s.y);
+        Sound.sfx(fav ? 'yum' : 'pop');
         if (fav) this.floatText(s, 'Yum! Favourite!', '#7cffb2');
         else this.floatText(s, 'Nibble...', '#ffffff');
       },
@@ -263,6 +268,7 @@ class SanctuaryScene extends Phaser.Scene {
   }
 
   cuddle(s) {
+    Sound.sfx('pop');
     this.hearts.explode(6, s.x, s.y - 10);
     this.tweens.add({ targets: s, scaleY: 1.7, scaleX: 2.3, duration: 120, yoyo: true });
     if (s.rec.health < 100) this.heal(s, 4);
@@ -285,6 +291,7 @@ class SanctuaryScene extends Phaser.Scene {
     [s.label, s.bar, s.barBg].forEach(o => o.destroy());
     s.setFlipX(false).play(`${rec.species}_walk`);
     this.hearts.explode(16, s.x, s.y);
+    Sound.sfx('sfx_release');
     this.tweens.add({ targets: s, x: GAME_W + 80, y: s.y - 140, duration: 2200, ease: 'Sine.in', onComplete: () => s.destroy() });
 
     const { fact, isNew } = Save.revealFact(rec.species);
@@ -391,6 +398,7 @@ class SanctuaryScene extends Phaser.Scene {
     this.shop.destroy();
     this.shop = null;
     this.placeDecor(d.key, true);
+    Sound.sfx('chime');
     toast(this, `${d.name} added to your cove!`, '#7cffb2');
   }
 }

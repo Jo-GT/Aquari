@@ -5,6 +5,8 @@ class JournalScene extends Phaser.Scene {
   create() {
     const s = Save.data;
     this.cameras.main.fadeIn(400, 2, 21, 38);
+    Sound.music(this, 'music_menu');
+    Sound.ambience(this, 'amb_waves');
     oceanGradient(this, GAME_W, GAME_H, '#ffe9c2', '#f5c98c');
     txt(this, GAME_W / 2, 42, `${PERSONAL.heroName}'s Ocean Journal`, 36, '#5a3410', { fontStyle: '700' }).setOrigin(0.5);
     const met = SPECIES_ORDER.filter(k => s.rescued[k]).length;

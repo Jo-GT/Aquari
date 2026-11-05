@@ -18,6 +18,7 @@ class BootScene extends Phaser.Scene {
     this.load.image('sub', 'sub.png');
     this.load.image('krill', 'krill-3.png');
     this.load.image('angie', 'angie.png');
+    PRELOADED_AUDIO.forEach(key => this.load.audio(key, `audio/${key}.mp3`));
     CREATURE_KEYS.forEach((k) => {
       ['idle', 'walk', 'hurt'].forEach((a) => sheet(`${k}_${a}`, `creatures/${k}_${a}.png`, 48, 48));
     });
@@ -27,6 +28,7 @@ class BootScene extends Phaser.Scene {
     makeTextures(this);
     makeAnims(this);
     Save.load();
+    Sound.init(this.game);
     const go = () => {
       if (this.started) return;
       this.started = true;
