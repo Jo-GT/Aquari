@@ -33,4 +33,3 @@ pip install pillow
 python tools/build_assets.py
 ```
 
-Sea creature sprites are from [craftpix.net](https://craftpix.net/file-licenses/) (free pack). Built with [Phaser 3](https://phaser.io).
