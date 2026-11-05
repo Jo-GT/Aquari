@@ -45,7 +45,27 @@ class MenuScene extends Phaser.Scene {
         ],
       }));
 
+    this.factBanner();
     ambientBubbles(this);
+  }
+
+  // Rotating "Did you know?" ocean fact along the bottom of the menu.
+  factBanner() {
+    const g = this.add.graphics().setDepth(30);
+    g.fillStyle(0x0b3954, 0.7).fillRoundedRect(150, 492, 610, 40, 14);
+    this.add.image(176, 512, 'shell').setScale(1.4).setDepth(31);
+    const t = txt(this, 200, 512, '', 15, '#fff8e7', { fontStyle: '400', wordWrap: { width: 548 } })
+      .setOrigin(0, 0.5).setDepth(31);
+    const order = Phaser.Utils.Array.Shuffle(OCEAN_FACTS.slice());
+    let i = 0;
+    const show = () => {
+      t.setText(`Did you know? ${order[i++ % order.length]}`);
+      t.setFontSize(t.height > 24 ? 13 : 15);
+      t.setAlpha(0);
+      this.tweens.add({ targets: t, alpha: 1, duration: 400 });
+    };
+    show();
+    this.time.addEvent({ delay: 9000, loop: true, callback: show });
   }
 
   go(key, data) {
@@ -98,6 +118,6 @@ class MenuScene extends Phaser.Scene {
     });
 
     c.add(button(this, GAME_W / 2, 480, 'Back', () => c.destroy(), { w: 160, h: 48, size: 20, fill: 0x9ad8ff }));
-    c.add(txt(this, GAME_W / 2, 520, '★ finish the dive   ★ clean up most of the trash   ★ find the message in a bottle', 14, '#d9f3ff').setOrigin(0.5));
+    c.add(txt(this, GAME_W / 2, 520, '★ finish the dive   ★ clean up most of the trash   ★ find all the messages in bottles', 14, '#d9f3ff').setOrigin(0.5));
   }
 }

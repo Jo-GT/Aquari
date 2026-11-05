@@ -59,12 +59,15 @@ class SanctuaryScene extends Phaser.Scene {
     };
     swim(true);
     this.visitor = { ws, label };
-    ws.setInteractive({ useHandCursor: true }).on('pointerup', () => modal(this, {
-      title: `${PERSONAL.whaleSharkName} came to visit!`,
-      body: `${SPECIES.whaleshark.fact}\n\nHow you can help: ${SPECIES.whaleshark.tip}`,
-      width: 620,
-      buttons: [{ label: 'Hi ♥' }],
-    }));
+    ws.setInteractive({ useHandCursor: true }).on('pointerup', () => {
+      const { fact, isNew } = Save.revealFact('whaleshark');
+      modal(this, {
+        title: `${PERSONAL.whaleSharkName} came to visit!`,
+        body: `${isNew ? 'New fact! ' : ''}${fact}\n\nHow you can help: ${SPECIES.whaleshark.tip}`,
+        width: 620,
+        buttons: [{ label: 'Hi ♥' }],
+      });
+    });
   }
 
   spawnAnimal(rec) {
@@ -213,10 +216,11 @@ class SanctuaryScene extends Phaser.Scene {
     this.hearts.explode(16, s.x, s.y);
     this.tweens.add({ targets: s, x: GAME_W + 80, y: s.y - 140, duration: 2200, ease: 'Sine.in', onComplete: () => s.destroy() });
 
+    const { fact, isNew } = Save.revealFact(rec.species);
     this.time.delayedCall(900, () => modal(this, {
       title: `${rec.name} is going home!`,
       image: sc => sc.add.sprite(0, 0, `${rec.species}_walk`).play(`${rec.species}_walk`).setScale(3),
-      body: `${sp.fact}\n\nHow you can help: ${sp.tip}`,
+      body: `${isNew ? 'New fact unlocked! ' : ''}${fact}\n\nHow you can help: ${sp.tip}`,
       width: 620,
       buttons: [{ label: `Bye ${rec.name}!`, fill: 0x7cffb2 }],
     }));

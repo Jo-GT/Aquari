@@ -46,7 +46,7 @@ class EndingScene extends Phaser.Scene {
     const lines = [
       PERSONAL.endingMessage,
       '',
-      `Friends rescued: ${s.friends.length}   ·   Released home: ${released}   ·   Messages found: ${s.bottles.length}/${LEVELS.length}`,
+      `Friends rescued: ${s.friends.length}   ·   Released home: ${released}   ·   Messages found: ${Save.notesFoundTotal()}/${Save.notesTotal()}   ·   Ocean facts: ${s.oceanFacts.length}/${OCEAN_FACTS.length}`,
       s.friends.length ? `With love from ${s.friends.map(f => f.name).join(', ')}` : '',
       `- ${PERSONAL.fromName}`,
     ];

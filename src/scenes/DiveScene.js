@@ -20,7 +20,7 @@ class DiveScene extends Phaser.Scene {
     this.surfacing = false;
     this.ui = null;
     this.dark = null;
-    this.stats = { rescued: 0, trash: 0, krill: 0, bottle: false };
+    this.stats = { rescued: 0, trash: 0, krill: 0, bottles: 0, shells: 0 };
     this.trail = [];
     this.pod = [];
     this.oxygen = 100;
@@ -34,7 +34,8 @@ class DiveScene extends Phaser.Scene {
     this.spawnVents();
     this.spawnKrill();
     this.spawnTrash();
-    this.spawnBottle();
+    this.spawnBottles();
+    this.spawnShells();
     this.spawnTangled();
     this.createPlayer();
 
@@ -204,14 +205,39 @@ class DiveScene extends Phaser.Scene {
     }
   }
 
-  spawnBottle() {
-    const b = this.L.bottle;
-    this.bottle = this.add.image(b.x, b.y, 'bottle_msg').setScale(1.8).setAngle(70).setDepth(21);
-    this.tweens.add({ targets: this.bottle, angle: 62, duration: 1400, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+  // One bottle per note not yet found in this dive. Extra notes beyond the
+  // hand-placed spots get random positions.
+  spawnBottles() {
+    const L = this.L;
+    const left = Save.notesIn(this.levelIndex).length - Save.notesFoundIn(this.levelIndex);
+    const spots = L.bottles.slice();
+    while (spots.length < left) {
+      spots.push({ x: this.rnd.between(200, L.width - 200), y: this.rnd.between(120, L.height - 70) });
+    }
+    this.bottles = spots.slice(spots.length - left).map((b) => {
+      const img = this.add.image(b.x, b.y, 'bottle_msg').setScale(1.8).setAngle(70).setDepth(21);
+      this.tweens.add({ targets: img, angle: 62, duration: 1400, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      return img;
+    });
     this.time.addEvent({
       delay: 1500, loop: true,
-      callback: () => { if (this.bottle.active) this.sparkles.explode(3, this.bottle.x + 6, this.bottle.y - 8); },
+      callback: () => this.bottles.forEach(b => this.sparkles.explode(3, b.x + 6, b.y - 8)),
     });
+  }
+
+  // Pearl shells on the seabed, each holding an ocean fact.
+  spawnShells() {
+    const L = this.L;
+    this.shells = [];
+    for (let i = 0; i < (L.shells || 0); i++) {
+      const x = this.rnd.between(300, L.width - 150);
+      const shell = this.add.image(x, L.height - 56, 'shell').setScale(2).setDepth(21);
+      this.add.particles(x, L.height - 66, 'bubble', {
+        speedY: { min: -40, max: -20 }, lifespan: 1600, scale: { start: 0.8, end: 0.3 },
+        alpha: { start: 0.8, end: 0 }, frequency: 600,
+      }).setDepth(21);
+      this.shells.push(shell);
+    }
   }
 
   spawnTangled() {
@@ -369,22 +395,49 @@ class DiveScene extends Phaser.Scene {
       return false;
     });
 
-    if (this.bottle.active && near(this.bottle, 46)) this.openBottle();
+    this.bottles = this.bottles.filter((b) => {
+      if (!near(b, 46)) return true;
+      this.openBottle(b);
+      return false;
+    });
+
+    this.shells = this.shells.filter((sh) => {
+      if (!near(sh, 40)) return true;
+      this.openShell(sh);
+      return false;
+    });
   }
 
-  openBottle() {
-    this.bottle.destroy();
-    this.stats.bottle = true;
-    if (!Save.data.bottles.includes(this.levelIndex)) Save.data.bottles.push(this.levelIndex);
+  openBottle(bottle) {
+    bottle.destroy();
+    const lvl = this.levelIndex;
+    const notes = Save.notesIn(lvl);
+    const index = Save.notesFoundIn(lvl);
+    if (index >= notes.length) return;
+    const note = notes[index];
+    Save.data.notesFound[lvl] = index + 1;
     Save.store();
+    this.stats.bottles++;
+    this.refreshHud();
     this.setPaused(true);
-    const note = PERSONAL.bottleNotes[this.levelIndex] || PERSONAL.bottleNotes[0];
     modal(this.ui, {
-      title: 'A message in a bottle!',
+      title: `Message in a bottle (${index + 1} of ${notes.length})`,
       image: (s) => s.add.image(0, 0, 'bottle_msg').setScale(3).setAngle(-20),
       body: `"${note}"\n\n- ${PERSONAL.fromName}`,
       buttons: [{ label: 'Aww ♥', fill: 0xff9ec0, onClick: () => this.setPaused(false) }],
     });
+  }
+
+  openShell(shell) {
+    this.tweens.add({ targets: shell, scaleY: 0.6, alpha: 0, duration: 300, onComplete: () => shell.destroy() });
+    this.sparkles.explode(6, shell.x, shell.y);
+    const seen = Save.data.oceanFacts;
+    const unseen = OCEAN_FACTS.map((_, i) => i).filter(i => !seen.includes(i));
+    const i = unseen.length ? Phaser.Utils.Array.GetRandom(unseen) : Phaser.Math.Between(0, OCEAN_FACTS.length - 1);
+    if (!seen.includes(i)) seen.push(i);
+    Save.store();
+    this.stats.shells++;
+    this.ui.showFact(OCEAN_FACTS[i]);
   }
 
   updateRescues(dt) {
@@ -434,6 +487,7 @@ class DiveScene extends Phaser.Scene {
 
     if (t.special) {
       s.metWhaleShark = true;
+      s.factsSeen.whaleshark = Math.max(1, s.factsSeen.whaleshark || 0);
       t.spr.play('whaleshark_swim');
       this.tweens.add({ targets: t.spr, scale: 0.42, duration: 800 });
       this.pod.unshift(t.spr);
@@ -441,7 +495,7 @@ class DiveScene extends Phaser.Scene {
       modal(this.ui, {
         title: `You saved ${name}!`,
         image: (sc) => sc.add.sprite(0, 0, 'whaleshark').play('whaleshark_swim').setScale(0.55),
-        body: `${SPECIES.whaleshark.fact}\n\n${name} is free, and wants to swim with you for a while.`,
+        body: `${speciesFact('whaleshark', 0)}\n\n${name} is free, and wants to swim with you for a while.`,
         width: 640,
         buttons: [{ label: 'Hi ' + name + '!', fill: 0x7cffb2, onClick: () => { this.setPaused(false); this.checkComplete(); } }],
       });
@@ -521,7 +575,8 @@ class DiveScene extends Phaser.Scene {
     const glow = (o) => rt.erase('light_small', o.x - cam.scrollX - 55, o.y - cam.scrollY - 55);
     this.tangled.forEach((t) => { if (!t.freed) glow(t.spr); });
     this.pod.forEach(glow);
-    if (this.bottle.active) glow(this.bottle);
+    this.bottles.forEach(glow);
+    this.shells.forEach(glow);
   }
 
   refreshHud() {
@@ -552,7 +607,9 @@ class DiveScene extends Phaser.Scene {
     const i = this.levelIndex;
     const last = i === LEVELS.length - 1;
     const cleaned = this.stats.trash / this.L.trash >= 0.8;
-    const stars = 1 + (cleaned ? 1 : 0) + (this.stats.bottle ? 1 : 0);
+    const notes = Save.notesIn(i).length;
+    const allNotes = Save.notesFoundIn(i) >= notes;
+    const stars = 1 + (cleaned ? 1 : 0) + (allNotes ? 1 : 0);
     s.stars[i] = Math.max(s.stars[i] || 0, stars);
     s.unlocked = Math.min(LEVELS.length, Math.max(s.unlocked, i + 2));
     if (last) s.finished = true;
@@ -574,7 +631,7 @@ class DiveScene extends Phaser.Scene {
         }
         return y + 56;
       },
-      body: `Friends rescued: ${this.stats.rescued}\nTrash cleaned: ${this.stats.trash} / ${this.L.trash}\nKrill collected: ${this.stats.krill}\n${this.stats.bottle ? 'Message in a bottle: found ♥' : 'Message in a bottle: still hidden somewhere...'}`,
+      body: `Friends rescued: ${this.stats.rescued}\nTrash cleaned: ${this.stats.trash} / ${this.L.trash}\nKrill collected: ${this.stats.krill}\nMessages in bottles: ${Save.notesFoundIn(i)} / ${notes}${allNotes ? ' ♥' : ' (some are still hidden...)'}\nOcean facts discovered: ${this.stats.shells}`,
       width: 640,
       buttons,
     });

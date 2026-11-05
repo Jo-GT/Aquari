@@ -99,6 +99,17 @@ function modal(scene, { title, body = '', buttons = [{ label: 'OK' }], width = 5
   return c;
 }
 
+// A modal that flips through `pages` (each { title, body }) with Back / Next.
+function pagedModal(scene, pages, index = 0, width = 720) {
+  const page = pages[index];
+  const buttons = [];
+  if (index > 0) buttons.push({ label: '< Back', fill: 0x9ad8ff, onClick: () => pagedModal(scene, pages, index - 1, width) });
+  buttons.push({ label: 'Close' });
+  if (index < pages.length - 1) buttons.push({ label: 'Next >', fill: 0x7cffb2, onClick: () => pagedModal(scene, pages, index + 1, width) });
+  const counter = pages.length > 1 ? `  (${index + 1}/${pages.length})` : '';
+  return modal(scene, { title: page.title + counter, body: page.body, width, buttons });
+}
+
 function toast(scene, message, color = '#ffffff') {
   scene._toasts = scene._toasts || [];
   scene._toasts.push({ message, color });

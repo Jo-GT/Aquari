@@ -125,6 +125,18 @@ function makeTextures(scene) {
     '.GGGGGG.',
   ], { N: 0xa0703c, G: 0x3fbf8a, W: 0xbfffe0, P: 0xfff1c9, R: 0xff6b9a }, 2);
 
+  pixelTexture(scene, 'shell', [
+    '....PPPPP....',
+    '..PPWPWPWPP..',
+    '.PPWPPWPPWPP.',
+    'PWPPWPPWPPWPP',
+    'PPWPPWPPWPPWP',
+    '.PPPPOOOPPPP.',
+    '..DDOOWOODD..',
+    '...DDOOODD...',
+    '....DDDDD....',
+  ], { P: 0xffb3c7, W: 0xffe3ec, D: 0xe58aa5, O: 0xfff6fb }, 2);
+
   pixelTexture(scene, 'sparkle', [
     '..W..',
     '..W..',
