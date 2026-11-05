@@ -68,6 +68,17 @@ def main():
     spout_boxes = [(335, 221, 349, 239), (326, 88, 356, 112), (329, 150, 358, 179)]
     pack_cells(SRC / "whale.png", spout_boxes, (32, 32), OUT / "spout.png")
 
+    # Angie's portrait is 10x-scaled pixel art: shrink to its native 60x60 grid
+    # and cut it into a circle so it can be used as an avatar.
+    face = Image.open(SRC / "angie profile.png").convert("RGBA").resize((60, 60), Image.NEAREST)
+    px = face.load()
+    for y in range(60):
+        for x in range(60):
+            if (x + 0.5 - 30) ** 2 + (y + 0.5 - 30) ** 2 > 29.5 ** 2:
+                px[x, y] = (0, 0, 0, 0)
+    face.save(OUT / "angie.png")
+    print("angie.png")
+
     for name in ["blue-whale.png", "blue-whale-smile.png", "krill-2.png", "krill-3.png"]:
         shutil.copy(SRC / name, OUT / name)
 

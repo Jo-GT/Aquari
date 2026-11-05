@@ -184,6 +184,17 @@ function ambientBubbles(scene, texture = 'bubble') {
   }).setScrollFactor(0).setDepth(40);
 }
 
+// Angie's round portrait with a white ring. `size` is the diameter in pixels.
+function angieAvatar(scene, x, y, size) {
+  const c = scene.add.container(x, y);
+  const ring = scene.add.graphics();
+  ring.fillStyle(0x0b3954, 1).fillCircle(0, 0, size / 2 + 5);
+  ring.fillStyle(0xffffff, 1).fillCircle(0, 0, size / 2 + 2);
+  c.add([ring, scene.add.image(0, 0, 'angie').setDisplaySize(size, size)]);
+  c.setSize(size + 10, size + 10);
+  return c;
+}
+
 // A sprite of any species, playing the given animation ('idle', 'walk', 'hurt').
 function creatureSprite(scene, x, y, species, anim = 'idle') {
   if (species === 'whaleshark') return scene.add.sprite(x, y, 'whaleshark').play('whaleshark_swim').setScale(0.5);

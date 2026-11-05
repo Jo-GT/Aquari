@@ -138,7 +138,8 @@ class SanctuaryScene extends Phaser.Scene {
       const msg = this.animals.length
         ? 'Tap a friend to look after them.\n\nFeed them krill and give them some love until they are strong enough to go home.'
         : 'Nobody here right now!\n\nGo on a Rescue Dive to help animals tangled in litter, and they will recover here.';
-      p.add(txt(this, x, 290, msg, 18, '#d9f3ff', { align: 'center', wordWrap: { width: 210 }, fontStyle: '400', lineSpacing: 4 }).setOrigin(0.5));
+      p.add(angieAvatar(this, x, 165, 90));
+      p.add(txt(this, x, 320, msg, 18, '#d9f3ff', { align: 'center', wordWrap: { width: 210 }, fontStyle: '400', lineSpacing: 4 }).setOrigin(0.5));
       if (!this.animals.length) {
         p.add(button(this, x, 450, 'Rescue Dives', () => this.go('Menu'), { w: 200, h: 46, size: 18 }));
       }

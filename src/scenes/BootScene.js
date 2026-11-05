@@ -17,6 +17,7 @@ class BootScene extends Phaser.Scene {
     sheet('bluewhale_smile', 'blue-whale-smile.png', 64, 64);
     this.load.image('sub', 'sub.png');
     this.load.image('krill', 'krill-3.png');
+    this.load.image('angie', 'angie.png');
     CREATURE_KEYS.forEach((k) => {
       ['idle', 'walk', 'hurt'].forEach((a) => sheet(`${k}_${a}`, `creatures/${k}_${a}.png`, 48, 48));
     });

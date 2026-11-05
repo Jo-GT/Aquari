@@ -66,6 +66,7 @@ class DiveScene extends Phaser.Scene {
     const L = this.L;
     const air = L.vehicle === 'diver' ? '\nSwim through bubble streams (or up to the surface) to refill your air.' : '';
     modal(ui, {
+      image: sc => angieAvatar(sc, 0, 0, 96),
       title: L.name,
       body: `${L.blurb}\n\nSwim with the arrow keys / WASD, or hold the screen.\nStay close to a tangled animal to free it. Grab trash to clear the water, and krill to feed friends at the Sanctuary.${air}`,
       width: 640,

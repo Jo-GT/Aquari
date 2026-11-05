@@ -33,3 +33,4 @@ pip install pillow
 python tools/build_assets.py
 ```
 
+Angie's portrait is pixel art by @viiolaceus.

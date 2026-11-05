@@ -14,23 +14,25 @@ class DiveUIScene extends Phaser.Scene {
     this.input.on('pointerup', () => { this._uiPointer = false; });
 
     const diver = L.vehicle === 'diver';
-    const panelW = diver ? 560 : 400;
+    const panelW = diver ? 580 : 420;
     const g = this.add.graphics();
     g.fillStyle(0x0b3954, 0.75);
-    g.fillRoundedRect(10, 10, panelW, 48, 16);
+    g.fillRoundedRect(30, 10, panelW, 48, 16);
+    angieAvatar(this, 40, 38, 56);
 
-    this.add.image(32, 34, 'heart').setScale(1.4);
-    this.rescueText = txt(this, 48, 34, '', 20).setOrigin(0, 0.5);
-    this.add.image(132, 34, 'trash_bottle').setScale(1.2);
-    this.trashText = txt(this, 146, 34, '', 20).setOrigin(0, 0.5);
-    this.add.image(240, 34, 'krill').setScale(2);
-    this.krillText = txt(this, 256, 34, '', 20).setOrigin(0, 0.5);
-    txt(this, 310, 34, L.name, 16, '#d9f3ffaa').setOrigin(0, 0.5).setVisible(!diver);
+    const ox = 54;  // room for the avatar
+    this.add.image(ox + 32, 34, 'heart').setScale(1.4);
+    this.rescueText = txt(this, ox + 48, 34, '', 20).setOrigin(0, 0.5);
+    this.add.image(ox + 132, 34, 'trash_bottle').setScale(1.2);
+    this.trashText = txt(this, ox + 146, 34, '', 20).setOrigin(0, 0.5);
+    this.add.image(ox + 240, 34, 'krill').setScale(2);
+    this.krillText = txt(this, ox + 256, 34, '', 20).setOrigin(0, 0.5);
+    txt(this, ox + 310, 34, L.name, 16, '#d9f3ffaa').setOrigin(0, 0.5).setVisible(!diver);
 
     if (diver) {
-      txt(this, 316, 34, 'Air', 18, '#d9f3ff').setOrigin(0, 0.5);
-      this.add.rectangle(356, 34, 196, 18, 0x021526).setOrigin(0, 0.5).setStrokeStyle(2, 0xffffff, 0.6);
-      this.airBar = this.add.rectangle(359, 34, 190, 12, 0x7fe3f0).setOrigin(0, 0.5);
+      txt(this, ox + 316, 34, 'Air', 18, '#d9f3ff').setOrigin(0, 0.5);
+      this.add.rectangle(ox + 356, 34, 196, 18, 0x021526).setOrigin(0, 0.5).setStrokeStyle(2, 0xffffff, 0.6);
+      this.airBar = this.add.rectangle(ox + 359, 34, 190, 12, 0x7fe3f0).setOrigin(0, 0.5);
     }
 
     button(this, GAME_W - 66, 34, 'Pause', () => this.dive.openPause(), { w: 108, h: 42, size: 18, fill: 0x9ad8ff });

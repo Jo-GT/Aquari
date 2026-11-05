@@ -16,6 +16,9 @@ class MenuScene extends Phaser.Scene {
     const ws = this.add.sprite(720, 285, 'whaleshark').play('whaleshark_swim').setScale(0.85).setDepth(20);
     this.tweens.add({ targets: ws, y: 268, duration: 2200, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
 
+    const face = angieAvatar(this, 862, 430, 120).setDepth(25);
+    this.tweens.add({ targets: face, y: 420, duration: 1800, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+
     txt(this, 250, 92, 'Aquari', 96, '#ffffff', { stroke: '#0b3954', strokeThickness: 12, fontStyle: '700' })
       .setOrigin(0.5).setDepth(30);
     txt(this, 250, 160, `${PERSONAL.heroName}'s Ocean Rescue`, 27, '#fff3b0', { stroke: '#0b3954', strokeThickness: 6 })

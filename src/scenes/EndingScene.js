@@ -14,6 +14,10 @@ class EndingScene extends Phaser.Scene {
     const ws = this.add.sprite(GAME_W / 2, 215, 'whaleshark').play('whaleshark_swim').setScale(0.62).setDepth(20);
     this.tweens.add({ targets: ws, y: 200, duration: 2000, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
 
+    const face = angieAvatar(this, 230, 190, 130).setDepth(21);
+    this.tweens.add({ targets: face, y: 178, duration: 1700, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+    txt(this, 12, GAME_H - 22, 'Angie portrait by @viiolaceus', 13, '#0b3954aa').setDepth(30);
+
     // the friends still recovering swim around the whale shark
     s.inCare.slice(0, 6).forEach((rec, i) => {
       const a = (i / 6) * Math.PI * 2;
