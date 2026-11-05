@@ -34,7 +34,7 @@ const PERSONAL = {
     ],
   ],
 
-  endingTitle: 'You saved the ocean, Angie ♥',
+  endingTitle: 'Congratulations! You saved the ocean, Angie ♥',
   endingMessage:
     "Every turtle, octopus and whale shark in here was saved because of you. " +
     "Thank you for caring so much about the ocean (and about me).",
